@@ -11,7 +11,7 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background-color: #f9f9f9;
+      background: linear-gradient(to bottom, #e0f7fa, #f1f8e9);
     }
 
     header {
@@ -46,7 +46,7 @@
       width: 100%;
     }
 
-    input[type="number"], input[type="range"], input[type="password"] {
+    input[type="number"], input[type="range"] {
       padding: 10px;
       font-size: 16px;
       margin: 10px;
@@ -71,6 +71,35 @@
       display: block;
       margin-top: 10px;
     }
+
+    #skibidiTitle {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+
+    #valueDisplay {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    #statusDisplay {
+      margin-top: 5px;
+      font-weight: bold;
+      color: white;
+      padding: 5px;
+      display: inline-block;
+      border-radius: 5px;
+    }
+
+    #statusDisplay.up {
+      background-color: #4CAF50;
+    }
+
+    #statusDisplay.down {
+      background-color: #e53935;
+    }
   </style>
 </head>
 <body>
@@ -78,15 +107,6 @@
     <h1>Number Tracker</h1>
   </header>
 
-  <!-- Passcode dialog -->
-  <div id="passcodeDialog">
-    <label for="passcode">Enter Passcode to Unlock Controls:</label>
-    <input type="password" id="passcode" placeholder="Enter passcode">
-    <button onclick="checkPasscode()">Unlock</button>
-    <p id="errorMessage" style="color: red; display: none;">Incorrect passcode!</p>
-  </div>
-
-  <!-- Controls (hidden by default) -->
   <div id="controls">
     <div>
       <label for="manualValue">Set Value:</label>
@@ -106,7 +126,12 @@
   </div>
 
   <div id="graph-container">
+    <div id="skibidiTitle">Skibidi</div>
     <canvas id="lineChart"></canvas>
+    <div id="valueDisplay">
+      Current Value: <span id="currentValue">50</span>
+      <div id="statusDisplay" class="up">Status: Up</div>
+    </div>
   </div>
 
   <footer>
@@ -159,8 +184,12 @@
     const lineChart = new Chart(ctx, config);
 
     let value = 50; // Starting value
+    let peakValue = value;
+
     const baseChangeElement = document.getElementById('baseChange');
     const randomRangeElement = document.getElementById('randomRange');
+    const currentValueElement = document.getElementById('currentValue');
+    const statusDisplayElement = document.getElementById('statusDisplay');
     const baseChangeValueDisplay = document.getElementById('baseChangeValue');
     const randomRangeValueDisplay = document.getElementById('randomRangeValue');
 
@@ -180,6 +209,12 @@
       const randomRange = parseInt(randomRangeElement.value, 10);
       const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
       value += baseChange + randomChange;
+
+      if (value > peakValue) {
+        peakValue = value;
+      }
+
+      updateDisplay();
       addDataPoint(now, value);
     }, 2000);
 
@@ -203,20 +238,24 @@
       if (manualInput !== '') {
         const now = new Date().toLocaleTimeString();
         value = parseInt(manualInput, 10);
+        if (value > peakValue) {
+          peakValue = value;
+        }
+        updateDisplay();
         addDataPoint(now, value);
         document.getElementById('manualValue').value = ''; // Clear input
       }
     }
 
-    // Unlock controls with passcode
-    const passcode = "1234"; // Set your passcode here
-    function checkPasscode() {
-      const input = document.getElementById('passcode').value;
-      if (input === passcode) {
-        document.getElementById('passcodeDialog').style.display = "none";
-        document.getElementById('controls').style.display = "block";
+    // Update the current value display and status
+    function updateDisplay() {
+      currentValueElement.textContent = value;
+      if (value < peakValue) {
+        statusDisplayElement.textContent = `Status: Down`;
+        statusDisplayElement.className = "down";
       } else {
-        document.getElementById('errorMessage').style.display = "block";
+        statusDisplayElement.textContent = `Status: Up`;
+        statusDisplayElement.className = "up";
       }
     }
   </script>
