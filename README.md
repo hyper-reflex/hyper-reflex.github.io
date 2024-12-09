@@ -21,6 +21,7 @@
     }
 
     #controls {
+      display: none; /* Hidden by default */
       margin: 20px auto;
     }
 
@@ -45,7 +46,7 @@
       width: 100%;
     }
 
-    input[type="number"], input[type="range"] {
+    input[type="number"], input[type="range"], input[type="password"] {
       padding: 10px;
       font-size: 16px;
       margin: 10px;
@@ -77,6 +78,15 @@
     <h1>Number Tracker</h1>
   </header>
 
+  <!-- Passcode dialog -->
+  <div id="passcodeDialog">
+    <label for="passcode">Enter Passcode to Unlock Controls:</label>
+    <input type="password" id="passcode" placeholder="Enter passcode">
+    <button onclick="checkPasscode()">Unlock</button>
+    <p id="errorMessage" style="color: red; display: none;">Incorrect passcode!</p>
+  </div>
+
+  <!-- Controls (hidden by default) -->
   <div id="controls">
     <div>
       <label for="manualValue">Set Value:</label>
@@ -163,7 +173,7 @@
       randomRangeValueDisplay.textContent = randomRangeElement.value;
     });
 
-    // Simulate live data update
+    // Simulate live data update (every 2 seconds)
     setInterval(() => {
       const now = new Date().toLocaleTimeString();
       const baseChange = parseInt(baseChangeElement.value, 10);
@@ -171,7 +181,7 @@
       const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
       value += baseChange + randomChange;
       addDataPoint(now, value);
-    }, 5000); // Update every 5 seconds
+    }, 2000);
 
     // Add a data point to the chart
     function addDataPoint(label, newValue) {
@@ -195,6 +205,18 @@
         value = parseInt(manualInput, 10);
         addDataPoint(now, value);
         document.getElementById('manualValue').value = ''; // Clear input
+      }
+    }
+
+    // Unlock controls with passcode
+    const passcode = "1234"; // Set your passcode here
+    function checkPasscode() {
+      const input = document.getElementById('passcode').value;
+      if (input === passcode) {
+        document.getElementById('passcodeDialog').style.display = "none";
+        document.getElementById('controls').style.display = "block";
+      } else {
+        document.getElementById('errorMessage').style.display = "block";
       }
     }
   </script>
