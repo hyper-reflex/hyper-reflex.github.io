@@ -24,6 +24,10 @@
       margin: 20px auto;
     }
 
+    #controls div {
+      margin-bottom: 10px;
+    }
+
     #graph-container {
       width: 80%;
       margin: 20px auto;
@@ -41,10 +45,9 @@
       width: 100%;
     }
 
-    input[type="number"] {
+    input[type="number"], input[type="range"] {
       padding: 10px;
       font-size: 16px;
-      width: 100px;
       margin: 10px;
     }
 
@@ -61,6 +64,12 @@
     button:hover {
       background-color: #45a049;
     }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -69,9 +78,21 @@
   </header>
 
   <div id="controls">
-    <label for="manualValue">Set Value: </label>
-    <input type="number" id="manualValue" placeholder="Enter value">
-    <button onclick="updateValue()">Update</button>
+    <div>
+      <label for="manualValue">Set Value:</label>
+      <input type="number" id="manualValue" placeholder="Enter value">
+      <button onclick="updateValue()">Update</button>
+    </div>
+    <div>
+      <label for="baseChange">Base Increment/Decrement:</label>
+      <input type="range" id="baseChange" min="-10" max="10" step="1" value="0">
+      <span id="baseChangeValue">0</span>
+    </div>
+    <div>
+      <label for="randomRange">Randomness Range:</label>
+      <input type="range" id="randomRange" min="0" max="20" step="1" value="5">
+      <span id="randomRangeValue">5</span>
+    </div>
   </div>
 
   <div id="graph-container">
@@ -128,13 +149,29 @@
     const lineChart = new Chart(ctx, config);
 
     let value = 50; // Starting value
+    const baseChangeElement = document.getElementById('baseChange');
+    const randomRangeElement = document.getElementById('randomRange');
+    const baseChangeValueDisplay = document.getElementById('baseChangeValue');
+    const randomRangeValueDisplay = document.getElementById('randomRangeValue');
+
+    // Update display for sliders
+    baseChangeElement.addEventListener('input', () => {
+      baseChangeValueDisplay.textContent = baseChangeElement.value;
+    });
+
+    randomRangeElement.addEventListener('input', () => {
+      randomRangeValueDisplay.textContent = randomRangeElement.value;
+    });
 
     // Simulate live data update
     setInterval(() => {
       const now = new Date().toLocaleTimeString();
-      value += Math.floor(Math.random() * 10 - 5); // Random value change
+      const baseChange = parseInt(baseChangeElement.value, 10);
+      const randomRange = parseInt(randomRangeElement.value, 10);
+      const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
+      value += baseChange + randomChange;
       addDataPoint(now, value);
-    }, 1000); // Update every second
+    }, 5000); // Update every 5 seconds
 
     // Add a data point to the chart
     function addDataPoint(label, newValue) {
