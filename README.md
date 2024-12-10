@@ -19,6 +19,15 @@
       background-color: #444;
       color: black; /* Black text */
       padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #currencyDisplay {
+      font-size: 18px;
+      color: black;
+      margin-right: 20px;
     }
 
     #controls {
@@ -112,6 +121,7 @@
 <body>
   <header>
     <h1>Dumb Stocks</h1>
+    <div id="currencyDisplay">Currency: $50</div>
   </header>
 
   <div>
@@ -121,6 +131,9 @@
   </div>
 
   <div id="controls">
+    <div>
+      <button onclick="closePanel()">Close Panel</button>
+    </div>
     <div>
       <label for="graphName">Graph Name:</label>
       <input type="text" id="graphName" placeholder="Enter graph name">
@@ -141,6 +154,11 @@
       <input type="range" id="randomRange" min="0" max="20" step="1" value="5">
       <span id="randomRangeValue">5</span>
     </div>
+    <div>
+      <label for="updateInterval">Update Interval (ms):</label>
+      <input type="number" id="updateInterval" placeholder="Interval in milliseconds" value="2000">
+      <button onclick="changeUpdateInterval()">Set Interval</button>
+    </div>
   </div>
 
   <div id="graph-container">
@@ -157,19 +175,112 @@
   </footer>
 
   <script>
-    // Initialize data for the chart
+    let value = 50; // Starting value
+    let peakValue = value;
+    let updateInterval = 2000; // Default update interval
+    let intervalId;
+    let currency = 50; // Starting currency
+
+    const baseChangeElement = document.getElementById('baseChange');
+    const randomRangeElement = document.getElementById('randomRange');
+    const currentValueElement = document.getElementById('currentValue');
+    const statusDisplayElement = document.getElementById('statusDisplay');
+    const baseChangeValueDisplay = document.getElementById('baseChangeValue');
+    const randomRangeValueDisplay = document.getElementById('randomRangeValue');
+    const graphNameElement = document.getElementById('skibidiTitle');
+    const currencyDisplay = document.getElementById('currencyDisplay');
+
+    function updateCurrencyDisplay() {
+      currencyDisplay.textContent = `Currency: $${currency}`;
+    }
+
+    function updateDisplay() {
+      currentValueElement.textContent = value;
+      if (value < peakValue) {
+        statusDisplayElement.textContent = `Status: Down`;
+        statusDisplayElement.className = "down";
+      } else {
+        statusDisplayElement.textContent = `Status: Up`;
+        statusDisplayElement.className = "up";
+      }
+    }
+
+    function addDataPoint(label, newValue) {
+      data.labels.push(label);
+      data.datasets[0].data.push(newValue);
+      if (data.labels.length > 10) {
+        data.labels.shift();
+        data.datasets[0].data.shift();
+      }
+      lineChart.update();
+    }
+
+    function updateValue() {
+      const manualInput = document.getElementById('manualValue').value;
+      if (manualInput !== '') {
+        value = parseInt(manualInput, 10);
+        if (value > peakValue) peakValue = value;
+        updateDisplay();
+        addDataPoint(new Date().toLocaleTimeString(), value);
+        document.getElementById('manualValue').value = '';
+      }
+    }
+
+    function updateGraphName() {
+      const graphNameInput = document.getElementById('graphName').value;
+      if (graphNameInput !== '') {
+        graphNameElement.textContent = graphNameInput;
+        document.getElementById('graphName').value = '';
+      }
+    }
+
+    function checkPasscode() {
+      const passcodeInput = document.getElementById('passcodeInput').value;
+      if (passcodeInput === "12345") {
+        document.getElementById('controls').style.display = 'block';
+        alert("Access granted!");
+      } else {
+        alert("Incorrect passcode. Try again!");
+      }
+    }
+
+    function closePanel() {
+      document.getElementById('controls').style.display = 'none';
+    }
+
+    function changeUpdateInterval() {
+      const newInterval = parseInt(document.getElementById('updateInterval').value, 10);
+      if (!isNaN(newInterval) && newInterval > 0) {
+        clearInterval(intervalId);
+        updateInterval = newInterval;
+        intervalId = setInterval(updateChart, updateInterval);
+        alert(`Update interval set to ${updateInterval} ms`);
+      }
+    }
+
+    function updateChart() {
+      const now = new Date().toLocaleTimeString();
+      const baseChange = parseInt(baseChangeElement.value, 10);
+      const randomRange = parseInt(randomRangeElement.value, 10);
+      const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
+      value += baseChange + randomChange;
+
+      if (value > peakValue) peakValue = value;
+      updateDisplay();
+      addDataPoint(now, value);
+    }
+
     const data = {
-      labels: [], // Time labels
+      labels: [],
       datasets: [{
         label: 'Value Over Time',
-        data: [], // Values to be tracked
+        data: [],
         borderColor: 'rgba(75, 192, 192, 1)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         tension: 0.4
       }]
     };
 
-    // Chart configuration
     const config = {
       type: 'line',
       data: data,
@@ -197,106 +308,10 @@
       }
     };
 
-    // Render the chart
     const ctx = document.getElementById('lineChart').getContext('2d');
     const lineChart = new Chart(ctx, config);
 
-    let value = 50; // Starting value
-    let peakValue = value;
-
-    const baseChangeElement = document.getElementById('baseChange');
-    const randomRangeElement = document.getElementById('randomRange');
-    const currentValueElement = document.getElementById('currentValue');
-    const statusDisplayElement = document.getElementById('statusDisplay');
-    const baseChangeValueDisplay = document.getElementById('baseChangeValue');
-    const randomRangeValueDisplay = document.getElementById('randomRangeValue');
-    const graphNameElement = document.getElementById('skibidiTitle');
-
-    // Update display for sliders
-    baseChangeElement.addEventListener('input', () => {
-      baseChangeValueDisplay.textContent = baseChangeElement.value;
-    });
-
-    randomRangeElement.addEventListener('input', () => {
-      randomRangeValueDisplay.textContent = randomRangeElement.value;
-    });
-
-    // Simulate live data update (every 2 seconds)
-    setInterval(() => {
-      const now = new Date().toLocaleTimeString();
-      const baseChange = parseInt(baseChangeElement.value, 10);
-      const randomRange = parseInt(randomRangeElement.value, 10);
-      const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
-      value += baseChange + randomChange;
-
-      if (value > peakValue) {
-        peakValue = value;
-      }
-
-      updateDisplay();
-      addDataPoint(now, value);
-    }, 2000);
-
-    // Add a data point to the chart
-    function addDataPoint(label, newValue) {
-      data.labels.push(label);
-      data.datasets[0].data.push(newValue);
-
-      // Limit to the last 10 data points
-      if (data.labels.length > 10) {
-        data.labels.shift();
-        data.datasets[0].data.shift();
-      }
-
-      lineChart.update();
-    }
-
-    // Update value manually
-    function updateValue() {
-      const manualInput = document.getElementById('manualValue').value;
-      if (manualInput !== '') {
-        const now = new Date().toLocaleTimeString();
-        value = parseInt(manualInput, 10);
-        if (value > peakValue) {
-          peakValue = value;
-        }
-        updateDisplay();
-        addDataPoint(now, value);
-        document.getElementById('manualValue').value = ''; // Clear input
-      }
-    }
-
-    // Update the current value display and status
-    function updateDisplay() {
-      currentValueElement.textContent = value;
-      if (value < peakValue) {
-        statusDisplayElement.textContent = `Status: Down`;
-        statusDisplayElement.className = "down";
-      } else {
-        statusDisplayElement.textContent = `Status: Up`;
-        statusDisplayElement.className = "up";
-      }
-    }
-
-    // Check passcode
-    function checkPasscode() {
-      const passcodeInput = document.getElementById('passcodeInput').value;
-      if (passcodeInput === "12345") {
-        document.getElementById('controls').style.display = 'block';
-        alert("Access granted!");
-      } else {
-        alert("Incorrect passcode. Try again!");
-      }
-    }
-
-    // Update the graph name
-    function updateGraphName() {
-      const graphNameInput = document.getElementById('graphName').value;
-      if (graphNameInput !== '') {
-        graphNameElement.textContent = graphNameInput;
-        document.getElementById('graphName').value = ''; // Clear input
-      }
-    }
+    intervalId = setInterval(updateChart, updateInterval);
   </script>
 </body>
 </html>
