@@ -17,7 +17,7 @@
 
     header {
       background-color: #444;
-      color: black;
+      color: white;
       padding: 20px;
       display: flex;
       justify-content: space-between;
@@ -136,6 +136,11 @@
       Current Value: <span id="currentValue">50</span>
       <div id="statusDisplay" class="up">Status: Up</div>
     </div>
+    <div>
+      <button onclick="deposit()">Deposit</button>
+      <input type="number" id="depositAmount" placeholder="Enter deposit amount">
+      <button onclick="withdraw()">Withdraw</button>
+    </div>
   </div>
 
   <footer>
@@ -145,16 +150,19 @@
   <script>
     let value = 50; // Starting value
     let peakValue = value;
+    let currency = 50; // Starting currency
     let intervalId;
     let refreshInterval = 2000; // Default refresh interval (2 seconds)
     let randomnessRange = 10; // Default randomness range (±10)
     const passcode = "12345"; // Correct passcode
 
     const currentValueElement = document.getElementById('currentValue');
+    const currencyDisplayElement = document.getElementById('currencyDisplay');
     const statusDisplayElement = document.getElementById('statusDisplay');
 
     function updateDisplay() {
       currentValueElement.textContent = value;
+      currencyDisplayElement.textContent = `Currency: $${currency}`;
       if (value < peakValue) {
         statusDisplayElement.textContent = `Status: Down`;
         statusDisplayElement.className = "down";
@@ -232,6 +240,25 @@
         updateDisplay();
         alert(`Graph value set to ${newValue}.`);
       }
+    }
+
+    function deposit() {
+      const amount = parseInt(document.getElementById('depositAmount').value);
+      if (!isNaN(amount) && amount > 0) {
+        currency -= amount;
+        peakValue = value;
+        updateDisplay();
+        alert(`Deposited $${amount}.`);
+      } else {
+        alert("Invalid deposit amount.");
+      }
+    }
+
+    function withdraw() {
+      const payout = value;
+      currency += payout;
+      updateDisplay();
+      alert(`Withdrew $${payout}.`);
     }
 
     const data = {
