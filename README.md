@@ -46,7 +46,7 @@
       width: 100%;
     }
 
-    input[type="number"], input[type="range"] {
+    input[type="number"], input[type="range"], input[type="password"] {
       padding: 10px;
       font-size: 16px;
       margin: 10px;
@@ -106,6 +106,12 @@
   <header>
     <h1>Number Tracker</h1>
   </header>
+
+  <div>
+    <label for="passcodeInput">Enter Passcode:</label>
+    <input type="password" id="passcodeInput" placeholder="Enter passcode">
+    <button onclick="checkPasscode()">Submit</button>
+  </div>
 
   <div id="controls">
     <div>
@@ -256,6 +262,17 @@
       } else {
         statusDisplayElement.textContent = `Status: Up`;
         statusDisplayElement.className = "up";
+      }
+    }
+
+    // Check passcode
+    function checkPasscode() {
+      const passcodeInput = document.getElementById('passcodeInput').value;
+      if (passcodeInput === "12345") {
+        document.getElementById('controls').style.display = 'block';
+        alert("Access granted!");
+      } else {
+        alert("Incorrect passcode. Try again!");
       }
     }
   </script>
