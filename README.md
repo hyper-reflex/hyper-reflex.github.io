@@ -11,13 +11,13 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background: linear-gradient(to bottom, #606060, #333333); /* Grey gradient */
-      color: white;
+      background-color: #2e7d32; /* Green background */
+      color: black; /* Black text */
     }
 
     header {
       background-color: #444;
-      color: white;
+      color: black; /* Black text */
       padding: 20px;
     }
 
@@ -63,7 +63,7 @@
       padding: 10px 20px;
       font-size: 16px;
       background-color: #444;
-      color: white;
+      color: black; /* Black text */
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -82,7 +82,7 @@
     #skibidiTitle {
       font-size: 24px;
       font-weight: bold;
-      color: #888;
+      color: #444; /* Darker text */
       margin-bottom: 10px;
     }
 
@@ -94,18 +94,18 @@
     #statusDisplay {
       margin-top: 5px;
       font-weight: bold;
-      color: white;
+      color: black; /* Black text */
       padding: 5px;
       display: inline-block;
       border-radius: 5px;
     }
 
     #statusDisplay.up {
-      background-color: #2e7d32;
+      background-color: #2e7d32; /* Green */
     }
 
     #statusDisplay.down {
-      background-color: #e53935;
+      background-color: #e53935; /* Red */
     }
   </style>
 </head>
@@ -291,12 +291,4 @@
 
     // Update the graph name
     function updateGraphName() {
-      const graphNameInput = document.getElementById('graphName').value;
-      if (graphNameInput !== '') {
-        graphNameElement.textContent = graphNameInput;
-        document.getElementById('graphName').value = ''; // Clear input
-      }
-    }
-  </script>
-</body>
-</html>
+      const graphNameInput = document.getElementById
