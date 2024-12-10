@@ -140,9 +140,13 @@
       <button onclick="updateGraphName()">Set Name</button>
     </div>
     <div>
-      <label for="manualValue">Set Value:</label>
-      <input type="number" id="manualValue" placeholder="Enter value">
-      <button onclick="updateValue()">Update</button>
+      <label for="depositAmount">Deposit Amount:</label>
+      <input type="number" id="depositAmount" placeholder="Amount to invest">
+      <button onclick="deposit()">Deposit</button>
+    </div>
+    <div>
+      <label for="withdrawAmount">Withdraw Amount:</label>
+      <button onclick="withdraw()">Withdraw</button>
     </div>
     <div>
       <label for="baseChange">Base Increment/Decrement:</label>
@@ -180,14 +184,10 @@
     let updateInterval = 2000; // Default update interval
     let intervalId;
     let currency = 50; // Starting currency
+    let investment = 0; // Tracks the invested amount
 
-    const baseChangeElement = document.getElementById('baseChange');
-    const randomRangeElement = document.getElementById('randomRange');
     const currentValueElement = document.getElementById('currentValue');
     const statusDisplayElement = document.getElementById('statusDisplay');
-    const baseChangeValueDisplay = document.getElementById('baseChangeValue');
-    const randomRangeValueDisplay = document.getElementById('randomRangeValue');
-    const graphNameElement = document.getElementById('skibidiTitle');
     const currencyDisplay = document.getElementById('currencyDisplay');
 
     function updateCurrencyDisplay() {
@@ -205,6 +205,43 @@
       }
     }
 
+    function deposit() {
+      const depositInput = document.getElementById('depositAmount').value;
+      const depositAmount = parseFloat(depositInput);
+      if (!isNaN(depositAmount) && depositAmount > 0 && depositAmount <= currency) {
+        currency -= depositAmount;
+        investment += depositAmount / value; // Store units of investment based on graph value
+        updateCurrencyDisplay();
+        alert(`Successfully invested $${depositAmount}.`);
+      } else {
+        alert('Invalid deposit amount or insufficient funds.');
+      }
+    }
+
+    function withdraw() {
+      if (investment > 0) {
+        const payout = investment * value; // Calculate payout based on current value
+        investment = 0; // Reset investment
+        currency += payout;
+        updateCurrencyDisplay();
+        alert(`Successfully withdrew $${payout.toFixed(2)}.`);
+      } else {
+        alert('No investment to withdraw.');
+      }
+    }
+
+    function updateChart() {
+      const now = new Date().toLocaleTimeString();
+      const baseChange = parseInt(document.getElementById('baseChange').value, 10);
+      const randomRange = parseInt(document.getElementById('randomRange').value, 10);
+      const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
+      value += baseChange + randomChange;
+
+      if (value > peakValue) peakValue = value;
+      updateDisplay();
+      addDataPoint(now, value);
+    }
+
     function addDataPoint(label, newValue) {
       data.labels.push(label);
       data.datasets[0].data.push(newValue);
@@ -213,61 +250,6 @@
         data.datasets[0].data.shift();
       }
       lineChart.update();
-    }
-
-    function updateValue() {
-      const manualInput = document.getElementById('manualValue').value;
-      if (manualInput !== '') {
-        value = parseInt(manualInput, 10);
-        if (value > peakValue) peakValue = value;
-        updateDisplay();
-        addDataPoint(new Date().toLocaleTimeString(), value);
-        document.getElementById('manualValue').value = '';
-      }
-    }
-
-    function updateGraphName() {
-      const graphNameInput = document.getElementById('graphName').value;
-      if (graphNameInput !== '') {
-        graphNameElement.textContent = graphNameInput;
-        document.getElementById('graphName').value = '';
-      }
-    }
-
-    function checkPasscode() {
-      const passcodeInput = document.getElementById('passcodeInput').value;
-      if (passcodeInput === "12345") {
-        document.getElementById('controls').style.display = 'block';
-        alert("Access granted!");
-      } else {
-        alert("Incorrect passcode. Try again!");
-      }
-    }
-
-    function closePanel() {
-      document.getElementById('controls').style.display = 'none';
-    }
-
-    function changeUpdateInterval() {
-      const newInterval = parseInt(document.getElementById('updateInterval').value, 10);
-      if (!isNaN(newInterval) && newInterval > 0) {
-        clearInterval(intervalId);
-        updateInterval = newInterval;
-        intervalId = setInterval(updateChart, updateInterval);
-        alert(`Update interval set to ${updateInterval} ms`);
-      }
-    }
-
-    function updateChart() {
-      const now = new Date().toLocaleTimeString();
-      const baseChange = parseInt(baseChangeElement.value, 10);
-      const randomRange = parseInt(randomRangeElement.value, 10);
-      const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
-      value += baseChange + randomChange;
-
-      if (value > peakValue) peakValue = value;
-      updateDisplay();
-      addDataPoint(now, value);
     }
 
     const data = {
