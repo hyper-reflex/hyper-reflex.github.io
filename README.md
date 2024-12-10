@@ -11,7 +11,7 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background-color: #2e7d32; /* Green background */
+      background-color: #d3d3d3; /* Grey background */
       color: black; /* Black text */
     }
 
@@ -291,4 +291,4 @@
 
     // Update the graph name
     function updateGraphName() {
-      const graphNameInput = document.getElementById
+      const graphNameInput = document.get
