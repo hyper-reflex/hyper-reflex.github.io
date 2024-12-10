@@ -11,12 +11,12 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background: linear-gradient(to bottom, #1b5e20, #004d00); /* Dark green gradient */
+      background: linear-gradient(to bottom, #606060, #333333); /* Grey gradient */
       color: white;
     }
 
     header {
-      background-color: #2e7d32;
+      background-color: #444;
       color: white;
       padding: 20px;
     }
@@ -25,7 +25,7 @@
       display: none; /* Hidden by default */
       margin: 20px auto;
       padding: 15px;
-      background-color: #333;
+      background-color: #222;
       border-radius: 8px;
     }
 
@@ -36,14 +36,14 @@
     #graph-container {
       width: 80%;
       margin: 20px auto;
-      background: #1b5e20;
+      background: #555;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       border-radius: 8px;
       padding: 20px;
     }
 
     footer {
-      background-color: #333;
+      background-color: #222;
       color: #ddd;
       padding: 10px;
       position: fixed;
@@ -51,7 +51,7 @@
       width: 100%;
     }
 
-    input[type="number"], input[type="range"], input[type="password"] {
+    input[type="number"], input[type="range"], input[type="password"], input[type="text"] {
       padding: 10px;
       font-size: 16px;
       margin: 10px;
@@ -62,7 +62,7 @@
     button {
       padding: 10px 20px;
       font-size: 16px;
-      background-color: #2e7d32;
+      background-color: #444;
       color: white;
       border: none;
       border-radius: 5px;
@@ -70,7 +70,7 @@
     }
 
     button:hover {
-      background-color: #1b5e20;
+      background-color: #333;
     }
 
     label {
@@ -82,7 +82,7 @@
     #skibidiTitle {
       font-size: 24px;
       font-weight: bold;
-      color: #2e7d32;
+      color: #888;
       margin-bottom: 10px;
     }
 
@@ -121,6 +121,11 @@
   </div>
 
   <div id="controls">
+    <div>
+      <label for="graphName">Graph Name:</label>
+      <input type="text" id="graphName" placeholder="Enter graph name">
+      <button onclick="updateGraphName()">Set Name</button>
+    </div>
     <div>
       <label for="manualValue">Set Value:</label>
       <input type="number" id="manualValue" placeholder="Enter value">
@@ -205,6 +210,7 @@
     const statusDisplayElement = document.getElementById('statusDisplay');
     const baseChangeValueDisplay = document.getElementById('baseChangeValue');
     const randomRangeValueDisplay = document.getElementById('randomRangeValue');
+    const graphNameElement = document.getElementById('skibidiTitle');
 
     // Update display for sliders
     baseChangeElement.addEventListener('input', () => {
@@ -280,6 +286,15 @@
         alert("Access granted!");
       } else {
         alert("Incorrect passcode. Try again!");
+      }
+    }
+
+    // Update the graph name
+    function updateGraphName() {
+      const graphNameInput = document.getElementById('graphName').value;
+      if (graphNameInput !== '') {
+        graphNameElement.textContent = graphNameInput;
+        document.getElementById('graphName').value = ''; // Clear input
       }
     }
   </script>
