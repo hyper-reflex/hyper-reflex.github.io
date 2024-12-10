@@ -113,6 +113,21 @@
       <input type="text" id="graphName" placeholder="Enter graph name">
       <button onclick="updateGraphName()">Set Name</button>
     </div>
+    <div>
+      <label for="refreshInterval">Graph Refresh Interval (ms):</label>
+      <input type="number" id="refreshInterval" placeholder="Set interval in ms">
+      <button onclick="updateRefreshInterval()">Set Interval</button>
+    </div>
+    <div>
+      <label for="randomnessRange">Randomness Range (±):</label>
+      <input type="number" id="randomnessRange" placeholder="Set randomness range">
+      <button onclick="updateRandomness()">Set Range</button>
+    </div>
+    <div>
+      <label for="setValue">Set Graph Value:</label>
+      <input type="number" id="setValue" placeholder="Enter value">
+      <button onclick="setGraphValue()">Set Value</button>
+    </div>
   </div>
 
   <div id="graph-container">
@@ -123,13 +138,6 @@
     </div>
   </div>
 
-  <div>
-    <label for="depositAmount">Deposit Amount:</label>
-    <input type="number" id="depositAmount" placeholder="Amount to invest">
-    <button onclick="deposit()">Deposit</button>
-    <button onclick="withdraw()">Withdraw</button>
-  </div>
-
   <footer>
     <p>Thank you for visiting our Dumb Stocks Tracker!</p>
   </footer>
@@ -138,17 +146,12 @@
     let value = 50; // Starting value
     let peakValue = value;
     let intervalId;
-    let currency = 50; // Starting currency
-    let investment = 0; // Tracks the invested amount
+    let refreshInterval = 2000; // Default refresh interval (2 seconds)
+    let randomnessRange = 10; // Default randomness range (±10)
     const passcode = "12345"; // Correct passcode
 
     const currentValueElement = document.getElementById('currentValue');
     const statusDisplayElement = document.getElementById('statusDisplay');
-    const currencyDisplay = document.getElementById('currencyDisplay');
-
-    function updateCurrencyDisplay() {
-      currencyDisplay.textContent = `Currency: $${currency}`;
-    }
 
     function updateDisplay() {
       currentValueElement.textContent = value;
@@ -161,29 +164,24 @@
       }
     }
 
-    function deposit() {
-      const depositInput = document.getElementById('depositAmount').value;
-      const depositAmount = parseFloat(depositInput);
-      if (!isNaN(depositAmount) && depositAmount > 0 && depositAmount <= currency) {
-        currency -= depositAmount;
-        investment += depositAmount / value; // Store units of investment based on graph value
-        updateCurrencyDisplay();
-        alert(`Successfully invested $${depositAmount}.`);
-      } else {
-        alert('Invalid deposit amount or insufficient funds.');
-      }
+    function updateChart() {
+      const now = new Date().toLocaleTimeString();
+      const randomChange = Math.floor(Math.random() * randomnessRange * 2 - randomnessRange);
+      value += randomChange;
+
+      if (value > peakValue) peakValue = value;
+      updateDisplay();
+      addDataPoint(now, value);
     }
 
-    function withdraw() {
-      if (investment > 0) {
-        const payout = investment * value; // Calculate payout based on current value
-        investment = 0; // Reset investment
-        currency += payout;
-        updateCurrencyDisplay();
-        alert(`Successfully withdrew $${payout.toFixed(2)}.`);
-      } else {
-        alert('No investment to withdraw.');
+    function addDataPoint(label, newValue) {
+      data.labels.push(label);
+      data.datasets[0].data.push(newValue);
+      if (data.labels.length > 10) {
+        data.labels.shift();
+        data.datasets[0].data.shift();
       }
+      lineChart.update();
     }
 
     function checkPasscode() {
@@ -200,24 +198,40 @@
       document.getElementById('controls').style.display = "none";
     }
 
-    function updateChart() {
-      const now = new Date().toLocaleTimeString();
-      const randomChange = Math.floor(Math.random() * 20 - 10); // Random value change
-      value += randomChange;
-
-      if (value > peakValue) peakValue = value;
-      updateDisplay();
-      addDataPoint(now, value);
+    function updateGraphName() {
+      const newName = document.getElementById('graphName').value;
+      if (newName) {
+        data.datasets[0].label = newName;
+        lineChart.update();
+      }
     }
 
-    function addDataPoint(label, newValue) {
-      data.labels.push(label);
-      data.datasets[0].data.push(newValue);
-      if (data.labels.length > 10) {
-        data.labels.shift();
-        data.datasets[0].data.shift();
+    function updateRefreshInterval() {
+      const newInterval = parseInt(document.getElementById('refreshInterval').value);
+      if (newInterval > 0) {
+        clearInterval(intervalId);
+        refreshInterval = newInterval;
+        intervalId = setInterval(updateChart, refreshInterval);
+        alert(`Graph refresh interval set to ${newInterval}ms.`);
       }
-      lineChart.update();
+    }
+
+    function updateRandomness() {
+      const newRange = parseInt(document.getElementById('randomnessRange').value);
+      if (newRange > 0) {
+        randomnessRange = newRange;
+        alert(`Randomness range set to ±${newRange}.`);
+      }
+    }
+
+    function setGraphValue() {
+      const newValue = parseInt(document.getElementById('setValue').value);
+      if (!isNaN(newValue)) {
+        value = newValue;
+        if (value > peakValue) peakValue = value;
+        updateDisplay();
+        alert(`Graph value set to ${newValue}.`);
+      }
     }
 
     const data = {
@@ -261,7 +275,7 @@
     const ctx = document.getElementById('lineChart').getContext('2d');
     const lineChart = new Chart(ctx, config);
 
-    intervalId = setInterval(updateChart, 2000); // Update every 2 seconds
+    intervalId = setInterval(updateChart, refreshInterval);
   </script>
 </body>
 </html>
