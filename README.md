@@ -292,3 +292,11 @@
     // Update the graph name
     function updateGraphName() {
       const graphNameInput = document.getElementById('graphName').value;
+      if (graphNameInput !== '') {
+        graphNameElement.textContent = graphNameInput;
+        document.getElementById('graphName').value = ''; // Clear input
+      }
+    }
+  </script>
+</body>
+</html>
