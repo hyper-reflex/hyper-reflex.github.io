@@ -291,4 +291,4 @@
 
     // Update the graph name
     function updateGraphName() {
-      const graphNameInput = document.get
+      const graphNameInput = document.getElementById('graphName').value;
