@@ -131,23 +131,34 @@
   <div class="graph-container">
     <canvas id="lineChart1"></canvas>
     <div class="graph-title" id="graphTitle1">Krithick</div>
+    <div>
+      <button onclick="depositCurrency(0)">Deposit</button>
+      <button onclick="withdrawCurrency(0)">Withdraw</button>
+      <label for="currencyInput1">Amount:</label>
+      <input type="number" id="currencyInput1" placeholder="Enter amount">
+    </div>
   </div>
 
   <div class="graph-container">
     <canvas id="lineChart2"></canvas>
     <div class="graph-title" id="graphTitle2">Advay</div>
+    <div>
+      <button onclick="depositCurrency(1)">Deposit</button>
+      <button onclick="withdrawCurrency(1)">Withdraw</button>
+      <label for="currencyInput2">Amount:</label>
+      <input type="number" id="currencyInput2" placeholder="Enter amount">
+    </div>
   </div>
 
   <div class="graph-container">
     <canvas id="lineChart3"></canvas>
     <div class="graph-title" id="graphTitle3">Will</div>
-  </div>
-
-  <div>
-    <button onclick="depositCurrency()">Deposit</button>
-    <button onclick="withdrawCurrency()">Withdraw</button>
-    <label for="currencyInput">Amount:</label>
-    <input type="number" id="currencyInput" placeholder="Enter amount">
+    <div>
+      <button onclick="depositCurrency(2)">Deposit</button>
+      <button onclick="withdrawCurrency(2)">Withdraw</button>
+      <label for="currencyInput3">Amount:</label>
+      <input type="number" id="currencyInput3" placeholder="Enter amount">
+    </div>
   </div>
 
   <footer>
@@ -228,94 +239,80 @@
 
     function checkPasscode() {
       const inputPasscode = document.getElementById('passcodeInput').value;
-      if (inputPasscode === "12345") {
-        document.getElementById('controls').style.display = "block";
-        alert("Control panel unlocked!");
+      if (inputPasscode === "12345") {        document.getElementById('controls').style.display = 'block';
+        document.getElementById('passcodeInput').value = '';
       } else {
-        alert("Incorrect passcode!");
+        alert('Incorrect passcode. Please try again.');
       }
     }
 
     function closePanel() {
-      document.getElementById('controls').style.display = "none";
+      document.getElementById('controls').style.display = 'none';
     }
 
     function updateGraphName() {
-      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
+      const selectedIndex = document.getElementById('selectedGraph').value;
       const newName = document.getElementById('graphName').value;
       if (newName) {
-        document.getElementById(`graphTitle${selectedGraph + 1}`).innerText = newName;
+        document.getElementById(`graphTitle${parseInt(selectedIndex) + 1}`).innerText = newName;
       }
     }
 
     function updateRefreshInterval() {
-      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
-      const newInterval = parseInt(document.getElementById('refreshInterval').value);
-      if (newInterval > 0) {
-        refreshIntervals[selectedGraph] = newInterval;
-        startGraphUpdates();
+      const selectedIndex = document.getElementById('selectedGraph').value;
+      const newInterval = parseInt(document.getElementById('refreshInterval').value, 10);
+      if (!isNaN(newInterval) && newInterval > 0) {
+        refreshIntervals[selectedIndex] = newInterval;
+        clearInterval(intervalIds[selectedIndex]);
+        intervalIds[selectedIndex] = setInterval(() => updateGraph(selectedIndex), newInterval);
       }
     }
 
     function updateRandomness() {
-      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
-      const newRange = parseInt(document.getElementById('randomnessRange').value);
-      if (newRange >= 0) {
-        randomnessRanges[selectedGraph] = newRange;
+      const selectedIndex = document.getElementById('selectedGraph').value;
+      const newRange = parseInt(document.getElementById('randomnessRange').value, 10);
+      if (!isNaN(newRange) && newRange >= 0) {
+        randomnessRanges[selectedIndex] = newRange;
       }
     }
 
     function setGraphValue() {
-      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
-      const newValue = parseInt(document.getElementById('setValue').value);
+      const selectedIndex = document.getElementById('selectedGraph').value;
+      const newValue = parseInt(document.getElementById('setValue').value, 10);
       if (!isNaN(newValue)) {
-        values[selectedGraph] = newValue;
-        peakValues[selectedGraph] = Math.max(peakValues[selectedGraph], newValue);
-        dataSets[selectedGraph].data.push(newValue);
-        const now = new Date().toLocaleTimeString();
-        dataSets[selectedGraph].labels.push(now);
-        if (dataSets[selectedGraph].labels.length > 10) {
-          dataSets[selectedGraph].labels.shift();
-          dataSets[selectedGraph].data.shift();
-        }
-        lineCharts[selectedGraph].update();
+        values[selectedIndex] = newValue;
+        peakValues[selectedIndex] = newValue; // Reset peak to the new value
+        dataSets[selectedIndex].labels = [];
+        dataSets[selectedIndex].data = [];
+        lineCharts[selectedIndex].update();
       }
     }
 
-    function depositCurrency() {
-      const amount = parseFloat(document.getElementById('currencyInput').value);
-      if (amount > 0) {
+    function depositCurrency(index) {
+      const amount = parseInt(document.getElementById(`currencyInput${index + 1}`).value, 10);
+      if (!isNaN(amount) && amount > 0) {
         currency += amount;
-        updateCurrencyDisplay();
-      } else {
-        alert("Enter a positive amount to deposit!");
+        document.getElementById('currencyDisplay').innerText = `Currency: $${currency}`;
       }
     }
 
-    function withdrawCurrency() {
-      const amount = parseFloat(document.getElementById('currencyInput').value);
-      if (amount > 0) {
-        if (amount <= currency) {
-          currency -= amount;
-          updateCurrencyDisplay();
-        } else {
-          alert("Not enough funds to withdraw!");
-        }
+    function withdrawCurrency(index) {
+      const amount = parseInt(document.getElementById(`currencyInput${index + 1}`).value, 10);
+      if (!isNaN(amount) && amount > 0 && currency >= amount) {
+        currency -= amount;
+        document.getElementById('currencyDisplay').innerText = `Currency: $${currency}`;
       } else {
-        alert("Enter a positive amount to withdraw!");
+        alert('Insufficient funds or invalid amount.');
       }
     }
 
-    function updateCurrencyDisplay() {
-      document.getElementById('currencyDisplay').innerText = `Currency: $${currency.toFixed(2)}`;
-    }
-
-    // Initialize charts
-    initializeChart("lineChart1", "graphTitle1", 0);
-    initializeChart("lineChart2", "graphTitle2", 1);
-    initializeChart("lineChart3", "graphTitle3", 2);
-    startGraphUpdates();
+    // Initialize charts when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeChart('lineChart1', 'graphTitle1', 0);
+      initializeChart('lineChart2', 'graphTitle2', 1);
+      initializeChart('lineChart3', 'graphTitle3', 2);
+      startGraphUpdates();
+    });
   </script>
 </body>
 </html>
-
