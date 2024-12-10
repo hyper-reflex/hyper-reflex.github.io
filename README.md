@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Number Tracker</title>
+  <title>Dumb Stocks</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       text-align: center;
       margin: 0;
       padding: 0;
-      background: linear-gradient(to bottom, #e0f7fa, #f1f8e9);
+      background: linear-gradient(to bottom, #1b5e20, #004d00); /* Dark green gradient */
+      color: white;
     }
 
     header {
-      background-color: #4CAF50;
+      background-color: #2e7d32;
       color: white;
       padding: 20px;
     }
@@ -23,6 +24,9 @@
     #controls {
       display: none; /* Hidden by default */
       margin: 20px auto;
+      padding: 15px;
+      background-color: #333;
+      border-radius: 8px;
     }
 
     #controls div {
@@ -32,14 +36,15 @@
     #graph-container {
       width: 80%;
       margin: 20px auto;
-      background: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: #1b5e20;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       border-radius: 8px;
       padding: 20px;
     }
 
     footer {
-      background-color: #f1f1f1;
+      background-color: #333;
+      color: #ddd;
       padding: 10px;
       position: fixed;
       bottom: 0;
@@ -50,12 +55,14 @@
       padding: 10px;
       font-size: 16px;
       margin: 10px;
+      border-radius: 5px;
+      border: none;
     }
 
     button {
       padding: 10px 20px;
       font-size: 16px;
-      background-color: #4CAF50;
+      background-color: #2e7d32;
       color: white;
       border: none;
       border-radius: 5px;
@@ -63,7 +70,7 @@
     }
 
     button:hover {
-      background-color: #45a049;
+      background-color: #1b5e20;
     }
 
     label {
@@ -75,7 +82,7 @@
     #skibidiTitle {
       font-size: 24px;
       font-weight: bold;
-      color: #4CAF50;
+      color: #2e7d32;
       margin-bottom: 10px;
     }
 
@@ -94,7 +101,7 @@
     }
 
     #statusDisplay.up {
-      background-color: #4CAF50;
+      background-color: #2e7d32;
     }
 
     #statusDisplay.down {
@@ -104,7 +111,7 @@
 </head>
 <body>
   <header>
-    <h1>Number Tracker</h1>
+    <h1>Dumb Stocks</h1>
   </header>
 
   <div>
@@ -141,7 +148,7 @@
   </div>
 
   <footer>
-    <p>Thank you for visiting our Number Tracker!</p>
+    <p>Thank you for visiting our Dumb Stocks Tracker!</p>
   </footer>
 
   <script>
