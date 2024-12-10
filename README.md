@@ -143,6 +143,13 @@
     <div class="graph-title" id="graphTitle3">Will</div>
   </div>
 
+  <div>
+    <button onclick="depositCurrency()">Deposit</button>
+    <button onclick="withdrawCurrency()">Withdraw</button>
+    <label for="currencyInput">Amount:</label>
+    <input type="number" id="currencyInput" placeholder="Enter amount">
+  </div>
+
   <footer>
     <p>Thank you for visiting our Dumb Stocks Tracker!</p>
   </footer>
@@ -237,22 +244,78 @@
       const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
       const newName = document.getElementById('graphName').value;
       if (newName) {
-        lineCharts[selectedGraph].data.datasets[0].label = newName;
         document.getElementById(`graphTitle${selectedGraph + 1}`).innerText = newName;
-        lineCharts[selectedGraph].update();
       }
     }
 
     function updateRefreshInterval() {
       const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
-      const interval = parseInt(document.getElementById('refreshInterval').value);
-      if (interval > 0) {
-        refreshIntervals[selectedGraph] = interval;
-        clearInterval(intervalIds[selectedGraph]);
-        intervalIds[selectedGraph] = setInterval(() => updateGraph(selectedGraph), refreshIntervals[selectedGraph]);
+      const newInterval = parseInt(document.getElementById('refreshInterval').value);
+      if (newInterval > 0) {
+        refreshIntervals[selectedGraph] = newInterval;
+        startGraphUpdates();
       }
     }
 
     function updateRandomness() {
       const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
-      const range = parseInt(document.getElementBy
+      const newRange = parseInt(document.getElementById('randomnessRange').value);
+      if (newRange >= 0) {
+        randomnessRanges[selectedGraph] = newRange;
+      }
+    }
+
+    function setGraphValue() {
+      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
+      const newValue = parseInt(document.getElementById('setValue').value);
+      if (!isNaN(newValue)) {
+        values[selectedGraph] = newValue;
+        peakValues[selectedGraph] = Math.max(peakValues[selectedGraph], newValue);
+        dataSets[selectedGraph].data.push(newValue);
+        const now = new Date().toLocaleTimeString();
+        dataSets[selectedGraph].labels.push(now);
+        if (dataSets[selectedGraph].labels.length > 10) {
+          dataSets[selectedGraph].labels.shift();
+          dataSets[selectedGraph].data.shift();
+        }
+        lineCharts[selectedGraph].update();
+      }
+    }
+
+    function depositCurrency() {
+      const amount = parseFloat(document.getElementById('currencyInput').value);
+      if (amount > 0) {
+        currency += amount;
+        updateCurrencyDisplay();
+      } else {
+        alert("Enter a positive amount to deposit!");
+      }
+    }
+
+    function withdrawCurrency() {
+      const amount = parseFloat(document.getElementById('currencyInput').value);
+      if (amount > 0) {
+        if (amount <= currency) {
+          currency -= amount;
+          updateCurrencyDisplay();
+        } else {
+          alert("Not enough funds to withdraw!");
+        }
+      } else {
+        alert("Enter a positive amount to withdraw!");
+      }
+    }
+
+    function updateCurrencyDisplay() {
+      document.getElementById('currencyDisplay').innerText = `Currency: $${currency.toFixed(2)}`;
+    }
+
+    // Initialize charts
+    initializeChart("lineChart1", "graphTitle1", 0);
+    initializeChart("lineChart2", "graphTitle2", 1);
+    initializeChart("lineChart3", "graphTitle3", 2);
+    startGraphUpdates();
+  </script>
+</body>
+</html>
+
