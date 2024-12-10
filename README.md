@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -130,17 +130,17 @@
 
   <div class="graph-container">
     <canvas id="lineChart1"></canvas>
-    <div class="graph-title">Krithick</div>
+    <div class="graph-title" id="graphTitle1">Krithick</div>
   </div>
 
   <div class="graph-container">
     <canvas id="lineChart2"></canvas>
-    <div class="graph-title">Advay</div>
+    <div class="graph-title" id="graphTitle2">Advay</div>
   </div>
 
   <div class="graph-container">
     <canvas id="lineChart3"></canvas>
-    <div class="graph-title">Will</div>
+    <div class="graph-title" id="graphTitle3">Will</div>
   </div>
 
   <footer>
@@ -161,15 +161,9 @@
       { labels: [], data: [] }
     ];
 
-    const chartConfigs = [
-      { type: 'line', data: {}, options: {} },
-      { type: 'line', data: {}, options: {} },
-      { type: 'line', data: {}, options: {} }
-    ];
-
     const lineCharts = [];
 
-    function initializeChart(canvasId, index) {
+    function initializeChart(canvasId, titleId, index) {
       const ctx = document.getElementById(canvasId).getContext('2d');
       const chartData = {
         labels: [],
@@ -197,8 +191,8 @@
 
       const chart = new Chart(ctx, config);
       dataSets[index] = chartData;
-      chartConfigs[index] = config;
       lineCharts[index] = chart;
+      document.getElementById(titleId).innerText = `Graph ${index + 1}`;
       return chart;
     }
 
@@ -243,4 +237,22 @@
       const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
       const newName = document.getElementById('graphName').value;
       if (newName) {
-        lineCharts[selectedGraph].data.datasets[0].
+        lineCharts[selectedGraph].data.datasets[0].label = newName;
+        document.getElementById(`graphTitle${selectedGraph + 1}`).innerText = newName;
+        lineCharts[selectedGraph].update();
+      }
+    }
+
+    function updateRefreshInterval() {
+      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
+      const interval = parseInt(document.getElementById('refreshInterval').value);
+      if (interval > 0) {
+        refreshIntervals[selectedGraph] = interval;
+        clearInterval(intervalIds[selectedGraph]);
+        intervalIds[selectedGraph] = setInterval(() => updateGraph(selectedGraph), refreshIntervals[selectedGraph]);
+      }
+    }
+
+    function updateRandomness() {
+      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
+      const range = parseInt(document.getElementBy
