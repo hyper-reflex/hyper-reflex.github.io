@@ -17,7 +17,7 @@
 
     header {
       background-color: #444;
-      color: black; /* Black text */
+      color: black;
       padding: 20px;
       display: flex;
       justify-content: space-between;
@@ -26,20 +26,7 @@
 
     #currencyDisplay {
       font-size: 18px;
-      color: black;
       margin-right: 20px;
-    }
-
-    #controls {
-      display: none; /* Hidden by default */
-      margin: 20px auto;
-      padding: 15px;
-      background-color: #222;
-      border-radius: 8px;
-    }
-
-    #controls div {
-      margin-bottom: 10px;
     }
 
     #graph-container {
@@ -60,21 +47,17 @@
       width: 100%;
     }
 
-    input[type="number"], input[type="range"], input[type="password"], input[type="text"] {
+    input[type="number"], input[type="password"], button {
       padding: 10px;
       font-size: 16px;
-      margin: 10px;
+      margin: 5px;
       border-radius: 5px;
       border: none;
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 16px;
       background-color: #444;
-      color: black; /* Black text */
-      border: none;
-      border-radius: 5px;
+      color: white;
       cursor: pointer;
     }
 
@@ -88,13 +71,6 @@
       margin-top: 10px;
     }
 
-    #skibidiTitle {
-      font-size: 24px;
-      font-weight: bold;
-      color: #444; /* Darker text */
-      margin-bottom: 10px;
-    }
-
     #valueDisplay {
       font-size: 18px;
       margin-top: 20px;
@@ -103,10 +79,8 @@
     #statusDisplay {
       margin-top: 5px;
       font-weight: bold;
-      color: black; /* Black text */
       padding: 5px;
       display: inline-block;
-      border-radius: 5px;
     }
 
     #statusDisplay.up {
@@ -130,7 +104,7 @@
     <button onclick="checkPasscode()">Submit</button>
   </div>
 
-  <div id="controls">
+  <div id="controls" style="display: none;">
     <div>
       <button onclick="closePanel()">Close Panel</button>
     </div>
@@ -139,39 +113,21 @@
       <input type="text" id="graphName" placeholder="Enter graph name">
       <button onclick="updateGraphName()">Set Name</button>
     </div>
-    <div>
-      <label for="depositAmount">Deposit Amount:</label>
-      <input type="number" id="depositAmount" placeholder="Amount to invest">
-      <button onclick="deposit()">Deposit</button>
-    </div>
-    <div>
-      <label for="withdrawAmount">Withdraw Amount:</label>
-      <button onclick="withdraw()">Withdraw</button>
-    </div>
-    <div>
-      <label for="baseChange">Base Increment/Decrement:</label>
-      <input type="range" id="baseChange" min="-10" max="10" step="1" value="0">
-      <span id="baseChangeValue">0</span>
-    </div>
-    <div>
-      <label for="randomRange">Randomness Range:</label>
-      <input type="range" id="randomRange" min="0" max="20" step="1" value="5">
-      <span id="randomRangeValue">5</span>
-    </div>
-    <div>
-      <label for="updateInterval">Update Interval (ms):</label>
-      <input type="number" id="updateInterval" placeholder="Interval in milliseconds" value="2000">
-      <button onclick="changeUpdateInterval()">Set Interval</button>
-    </div>
   </div>
 
   <div id="graph-container">
-    <div id="skibidiTitle">Skibidi</div>
     <canvas id="lineChart"></canvas>
     <div id="valueDisplay">
       Current Value: <span id="currentValue">50</span>
       <div id="statusDisplay" class="up">Status: Up</div>
     </div>
+  </div>
+
+  <div>
+    <label for="depositAmount">Deposit Amount:</label>
+    <input type="number" id="depositAmount" placeholder="Amount to invest">
+    <button onclick="deposit()">Deposit</button>
+    <button onclick="withdraw()">Withdraw</button>
   </div>
 
   <footer>
@@ -181,10 +137,10 @@
   <script>
     let value = 50; // Starting value
     let peakValue = value;
-    let updateInterval = 2000; // Default update interval
     let intervalId;
     let currency = 50; // Starting currency
     let investment = 0; // Tracks the invested amount
+    const passcode = "12345"; // Correct passcode
 
     const currentValueElement = document.getElementById('currentValue');
     const statusDisplayElement = document.getElementById('statusDisplay');
@@ -230,12 +186,24 @@
       }
     }
 
+    function checkPasscode() {
+      const inputPasscode = document.getElementById('passcodeInput').value;
+      if (inputPasscode === passcode) {
+        document.getElementById('controls').style.display = "block";
+        alert("Control panel unlocked!");
+      } else {
+        alert("Incorrect passcode!");
+      }
+    }
+
+    function closePanel() {
+      document.getElementById('controls').style.display = "none";
+    }
+
     function updateChart() {
       const now = new Date().toLocaleTimeString();
-      const baseChange = parseInt(document.getElementById('baseChange').value, 10);
-      const randomRange = parseInt(document.getElementById('randomRange').value, 10);
-      const randomChange = Math.floor(Math.random() * (randomRange + 1)) - randomRange / 2;
-      value += baseChange + randomChange;
+      const randomChange = Math.floor(Math.random() * 20 - 10); // Random value change
+      value += randomChange;
 
       if (value > peakValue) peakValue = value;
       updateDisplay();
@@ -293,7 +261,7 @@
     const ctx = document.getElementById('lineChart').getContext('2d');
     const lineChart = new Chart(ctx, config);
 
-    intervalId = setInterval(updateChart, updateInterval);
+    intervalId = setInterval(updateChart, 2000); // Update every 2 seconds
   </script>
 </body>
 </html>
