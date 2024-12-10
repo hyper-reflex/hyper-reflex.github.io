@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -29,7 +29,7 @@
       margin-right: 20px;
     }
 
-    #graph-container {
+    .graph-container {
       width: 80%;
       margin: 20px auto;
       background: #555;
@@ -47,7 +47,7 @@
       width: 100%;
     }
 
-    input[type="number"], input[type="password"], button {
+    input[type="number"], input[type="password"], input[type="text"], button {
       padding: 10px;
       font-size: 16px;
       margin: 5px;
@@ -71,24 +71,14 @@
       margin-top: 10px;
     }
 
-    #valueDisplay {
-      font-size: 18px;
-      margin-top: 20px;
+    #controls {
+      display: none;
+      margin: 20px;
     }
 
-    #statusDisplay {
-      margin-top: 5px;
-      font-weight: bold;
-      padding: 5px;
-      display: inline-block;
-    }
-
-    #statusDisplay.up {
-      background-color: #2e7d32; /* Green */
-    }
-
-    #statusDisplay.down {
-      background-color: #e53935; /* Red */
+    .graph-title {
+      font-size: 20px;
+      color: white;
     }
   </style>
 </head>
@@ -104,9 +94,17 @@
     <button onclick="checkPasscode()">Submit</button>
   </div>
 
-  <div id="controls" style="display: none;">
+  <div id="controls">
     <div>
       <button onclick="closePanel()">Close Panel</button>
+    </div>
+    <div>
+      <label for="selectedGraph">Select Graph:</label>
+      <select id="selectedGraph">
+        <option value="0">Krithick</option>
+        <option value="1">Advay</option>
+        <option value="2">Will</option>
+      </select>
     </div>
     <div>
       <label for="graphName">Graph Name:</label>
@@ -130,17 +128,19 @@
     </div>
   </div>
 
-  <div id="graph-container">
-    <canvas id="lineChart"></canvas>
-    <div id="valueDisplay">
-      Current Value: <span id="currentValue">50</span>
-      <div id="statusDisplay" class="up">Status: Up</div>
-    </div>
-    <div>
-      <button onclick="deposit()">Deposit</button>
-      <input type="number" id="depositAmount" placeholder="Enter deposit amount">
-      <button onclick="withdraw()">Withdraw</button>
-    </div>
+  <div class="graph-container">
+    <canvas id="lineChart1"></canvas>
+    <div class="graph-title">Krithick</div>
+  </div>
+
+  <div class="graph-container">
+    <canvas id="lineChart2"></canvas>
+    <div class="graph-title">Advay</div>
+  </div>
+
+  <div class="graph-container">
+    <canvas id="lineChart3"></canvas>
+    <div class="graph-title">Will</div>
   </div>
 
   <footer>
@@ -148,53 +148,86 @@
   </footer>
 
   <script>
-    let value = 50; // Starting value
-    let peakValue = value;
-    let currency = 50; // Starting currency
-    let intervalId;
-    let refreshInterval = 2000; // Default refresh interval (2 seconds)
-    let randomnessRange = 10; // Default randomness range (±10)
-    const passcode = "12345"; // Correct passcode
+    let currency = 50;
+    let intervalIds = [null, null, null];
+    let refreshIntervals = [2000, 2000, 2000]; // Default refresh intervals
+    let randomnessRanges = [10, 10, 10]; // Default randomness ranges
+    let values = [50, 50, 50]; // Starting values
+    let peakValues = [...values];
 
-    const currentValueElement = document.getElementById('currentValue');
-    const currencyDisplayElement = document.getElementById('currencyDisplay');
-    const statusDisplayElement = document.getElementById('statusDisplay');
+    const dataSets = [
+      { labels: [], data: [] },
+      { labels: [], data: [] },
+      { labels: [], data: [] }
+    ];
 
-    function updateDisplay() {
-      currentValueElement.textContent = value;
-      currencyDisplayElement.textContent = `Currency: $${currency}`;
-      if (value < peakValue) {
-        statusDisplayElement.textContent = `Status: Down`;
-        statusDisplayElement.className = "down";
-      } else {
-        statusDisplayElement.textContent = `Status: Up`;
-        statusDisplayElement.className = "up";
-      }
+    const chartConfigs = [
+      { type: 'line', data: {}, options: {} },
+      { type: 'line', data: {}, options: {} },
+      { type: 'line', data: {}, options: {} }
+    ];
+
+    const lineCharts = [];
+
+    function initializeChart(canvasId, index) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      const chartData = {
+        labels: [],
+        datasets: [{
+          label: `Graph ${index + 1}`,
+          data: [],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.4
+        }]
+      };
+
+      const config = {
+        type: 'line',
+        data: chartData,
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true } },
+          scales: {
+            x: { title: { display: true, text: 'Time' } },
+            y: { title: { display: true, text: 'Value' } }
+          }
+        }
+      };
+
+      const chart = new Chart(ctx, config);
+      dataSets[index] = chartData;
+      chartConfigs[index] = config;
+      lineCharts[index] = chart;
+      return chart;
     }
 
-    function updateChart() {
+    function updateGraph(index) {
       const now = new Date().toLocaleTimeString();
-      const randomChange = Math.floor(Math.random() * randomnessRange * 2 - randomnessRange);
-      value += randomChange;
+      const randomChange = Math.floor(Math.random() * randomnessRanges[index] * 2 - randomnessRanges[index]);
+      values[index] += randomChange;
 
-      if (value > peakValue) peakValue = value;
-      updateDisplay();
-      addDataPoint(now, value);
+      if (values[index] > peakValues[index]) peakValues[index] = values[index];
+
+      dataSets[index].labels.push(now);
+      dataSets[index].data.push(values[index]);
+      if (dataSets[index].labels.length > 10) {
+        dataSets[index].labels.shift();
+        dataSets[index].data.shift();
+      }
+      lineCharts[index].update();
     }
 
-    function addDataPoint(label, newValue) {
-      data.labels.push(label);
-      data.datasets[0].data.push(newValue);
-      if (data.labels.length > 10) {
-        data.labels.shift();
-        data.datasets[0].data.shift();
-      }
-      lineChart.update();
+    function startGraphUpdates() {
+      intervalIds.forEach((id, index) => {
+        if (id) clearInterval(id);
+        intervalIds[index] = setInterval(() => updateGraph(index), refreshIntervals[index]);
+      });
     }
 
     function checkPasscode() {
       const inputPasscode = document.getElementById('passcodeInput').value;
-      if (inputPasscode === passcode) {
+      if (inputPasscode === "12345") {
         document.getElementById('controls').style.display = "block";
         alert("Control panel unlocked!");
       } else {
@@ -207,102 +240,7 @@
     }
 
     function updateGraphName() {
+      const selectedGraph = parseInt(document.getElementById('selectedGraph').value);
       const newName = document.getElementById('graphName').value;
       if (newName) {
-        data.datasets[0].label = newName;
-        lineChart.update();
-      }
-    }
-
-    function updateRefreshInterval() {
-      const newInterval = parseInt(document.getElementById('refreshInterval').value);
-      if (newInterval > 0) {
-        clearInterval(intervalId);
-        refreshInterval = newInterval;
-        intervalId = setInterval(updateChart, refreshInterval);
-        alert(`Graph refresh interval set to ${newInterval}ms.`);
-      }
-    }
-
-    function updateRandomness() {
-      const newRange = parseInt(document.getElementById('randomnessRange').value);
-      if (newRange > 0) {
-        randomnessRange = newRange;
-        alert(`Randomness range set to ±${newRange}.`);
-      }
-    }
-
-    function setGraphValue() {
-      const newValue = parseInt(document.getElementById('setValue').value);
-      if (!isNaN(newValue)) {
-        value = newValue;
-        if (value > peakValue) peakValue = value;
-        updateDisplay();
-        alert(`Graph value set to ${newValue}.`);
-      }
-    }
-
-    function deposit() {
-      const amount = parseInt(document.getElementById('depositAmount').value);
-      if (!isNaN(amount) && amount > 0) {
-        currency -= amount;
-        peakValue = value;
-        updateDisplay();
-        alert(`Deposited $${amount}.`);
-      } else {
-        alert("Invalid deposit amount.");
-      }
-    }
-
-    function withdraw() {
-      const payout = value;
-      currency += payout;
-      updateDisplay();
-      alert(`Withdrew $${payout}.`);
-    }
-
-    const data = {
-      labels: [],
-      datasets: [{
-        label: 'Value Over Time',
-        data: [],
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.4
-      }]
-    };
-
-    const config = {
-      type: 'line',
-      data: data,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: true
-          }
-        },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Time'
-            }
-          },
-          y: {
-            title: {
-              display: true,
-              text: 'Value'
-            }
-          }
-        }
-      }
-    };
-
-    const ctx = document.getElementById('lineChart').getContext('2d');
-    const lineChart = new Chart(ctx, config);
-
-    intervalId = setInterval(updateChart, refreshInterval);
-  </script>
-</body>
-</html>
+        lineCharts[selectedGraph].data.datasets[0].
