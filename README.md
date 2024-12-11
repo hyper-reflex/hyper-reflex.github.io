@@ -1,268 +1,118 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dumb Stocks</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
+<title>Dumb Stocks</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
     body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-      background-color: #d3d3d3; /* Grey background */
-      color: black; /* Black text */
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+    }
+    .chart-container {
+        display: none;
+    }
+</style>
+<script>
+    let currency1 = 1000, currency2 = 1000, currency3 = 1000; // Initial currency for each graph
+    let value1 = 10, value2 = 20, value3 = 15; // Initial stock value for each graph
+    let currentGraph = 1;
+    let intervalId;
+    const refreshInterval = 5000; // Refresh interval for the chart updates
+
+    function updateDisplay() {
+        document.getElementById('currencyDisplay1').textContent = `$${currency1}`;
+        document.getElementById('currencyDisplay2').textContent = `$${currency2}`;
+        document.getElementById('currencyDisplay3').textContent = `$${currency3}`;
     }
 
-    header {
-      background-color: #444;
-      color: white;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #currencyDisplay {
-      font-size: 18px;
-      margin-right: 20px;
-    }
-
-    .graph-container {
-      width: 80%;
-      margin: 20px auto;
-      background: #555;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      padding: 20px;
-    }
-
-    footer {
-      background-color: #222;
-      color: #ddd;
-      padding: 10px;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-    }
-
-    input[type="number"], input[type="password"], input[type="text"], button {
-      padding: 10px;
-      font-size: 16px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-
-    button {
-      background-color: #444;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #333;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-    }
-
-    #controls {
-      display: none;
-      margin: 20px;
-    }
-
-    .graph-title {
-      font-size: 20px;
-      color: white;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Dumb Stocks</h1>
-    <div id="currencyDisplay">Currency: $50</div>
-  </header>
-
-  <div>
-    <label for="passcodeInput">Enter Passcode:</label>
-    <input type="password" id="passcodeInput" placeholder="Enter passcode">
-    <button onclick="checkPasscode()">Submit</button>
-  </div>
-
-  <div id="controls">
-    <div>
-      <button onclick="closePanel()">Close Panel</button>
-    </div>
-    <div>
-      <label for="selectedGraph">Select Graph:</label>
-      <select id="selectedGraph">
-        <option value="0">Krithick</option>
-        <option value="1">Advay</option>
-        <option value="2">Will</option>
-      </select>
-    </div>
-    <div>
-      <label for="graphName">Graph Name:</label>
-      <input type="text" id="graphName" placeholder="Enter graph name">
-      <button onclick="updateGraphName()">Set Name</button>
-    </div>
-    <div>
-      <label for="refreshInterval">Graph Refresh Interval (ms):</label>
-      <input type="number" id="refreshInterval" placeholder="Set interval in ms">
-      <button onclick="updateRefreshInterval()">Set Interval</button>
-    </div>
-    <div>
-      <label for="randomnessRange">Randomness Range (±):</label>
-      <input type="number" id="randomnessRange" placeholder="Set randomness range">
-      <button onclick="updateRandomness()">Set Range</button>
-    </div>
-    <div>
-      <label for="setValue">Set Graph Value:</label>
-      <input type="number" id="setValue" placeholder="Enter value">
-      <button onclick="setGraphValue()">Set Value</button>
-    </div>
-  </div>
-
-  <div class="graph-container">
-    <canvas id="lineChart1"></canvas>
-    <div class="graph-title" id="graphTitle1">Krithick</div>
-    <div>
-      <button onclick="depositCurrency(0)">Deposit</button>
-      <button onclick="withdrawCurrency(0)">Withdraw</button>
-      <label for="currencyInput1">Amount:</label>
-      <input type="number" id="currencyInput1" placeholder="Enter amount">
-    </div>
-  </div>
-
-  <div class="graph-container">
-    <canvas id="lineChart2"></canvas>
-    <div class="graph-title" id="graphTitle2">Advay</div>
-    <div>
-      <button onclick="depositCurrency(1)">Deposit</button>
-      <button onclick="withdrawCurrency(1)">Withdraw</button>
-      <label for="currencyInput2">Amount:</label>
-      <input type="number" id="currencyInput2" placeholder="Enter amount">
-    </div>
-  </div>
-
-  <div class="graph-container">
-    <canvas id="lineChart3"></canvas>
-    <div class="graph-title" id="graphTitle3">Will</div>
-    <div>
-      <button onclick="depositCurrency(2)">Deposit</button>
-      <button onclick="withdrawCurrency(2)">Withdraw</button>
-      <label for="currencyInput3">Amount:</label>
-      <input type="number" id="currencyInput3" placeholder="Enter amount">
-    </div>
-  </div>
-
-  <footer>
-    <p>Thank you for visiting our Dumb Stocks Tracker!</p>
-  </footer>
-
-  <script>
-    let currency = 50;
-    let intervalIds = [null, null, null];
-    let refreshIntervals = [2000, 2000, 2000]; // Default refresh intervals
-    let randomnessRanges = [10, 10, 10]; // Default randomness ranges
-    let values = [50, 50, 50]; // Starting values
-    let peakValues = [...values];
-
-    const dataSets = [
-      { labels: [], data: [] },
-      { labels: [], data: [] },
-      { labels: [], data: [] }
-    ];
-
-    const lineCharts = [];
-
-    function initializeChart(canvasId, titleId, index) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      const chartData = {
-        labels: [],
-        datasets: [{
-          label: `Graph ${index + 1}`,
-          data: [],
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          tension: 0.4
-        }]
-      };
-
-      const config = {
-        type: 'line',
-        data: chartData,
-        options: {
-          responsive: true,
-          plugins: { legend: { display: true } },
-          scales: {
-            x: { title: { display: true, text: 'Time' } },
-            y: { title: { display: true, text: 'Value' } }
-          }
+    function deposit() {
+        const amount = parseInt(document.getElementById('depositAmount').value);
+        if (!isNaN(amount) && amount > 0) {
+            switch (currentGraph) {
+                case 1:
+                    currency1 += amount;
+                    alert(`Deposited $${amount} to Graph 1.`);
+                    break;
+                case 2:
+                    currency2 += amount;
+                    alert(`Deposited $${amount} to Graph 2.`);
+                    break;
+                case 3:
+                    currency3 += amount;
+                    alert(`Deposited $${amount} to Graph 3.`);
+                    break;
+            }
+            updateDisplay();
+        } else {
+            alert("Please enter a valid positive deposit amount.");
         }
-      };
-
-      try {
-        const chart = new Chart(ctx, config);
-        dataSets[index] = chartData;
-        lineCharts[index] = chart;
-        document.getElementById(titleId).innerText = `Graph ${index + 1}`;
-        console.log(`Chart ${index + 1} initialized successfully`);
-      } catch (error) {
-        console.error(`Error initializing Chart ${index + 1}:`, error);
-      }
     }
 
-    function updateGraph(index) {
-      const now = new Date().toLocaleTimeString();
-      const randomChange = Math.floor(Math.random() * randomnessRanges[index] * 2 - randomnessRanges[index]);
-      values[index] += randomChange;
-
-      if (values[index] > peakValues[index]) peakValues[index] = values[index];
-
-      dataSets[index].labels.push(now);
-      dataSets[index].data.push(values[index]);
-      if (dataSets[index].labels.length > 10) {
-        dataSets[index].labels.shift();
-        dataSets[index].data.shift();
-      }
-      lineCharts[index].update();
+    function withdraw() {
+        const amount = parseInt(document.getElementById('depositAmount').value);
+        if (!isNaN(amount) && amount > 0) {
+            if (currentGraph === 1 && amount <= currency1) {
+                currency1 -= amount;
+                alert(`Withdrew $${amount} from Graph 1.`);
+            } else if (currentGraph === 2 && amount <= currency2) {
+                currency2 -= amount;
+                alert(`Withdrew $${amount} from Graph 2.`);
+            } else if (currentGraph === 3 && amount <= currency3) {
+                currency3 -= amount;
+                alert(`Withdrew $${amount} from Graph 3.`);
+            } else {
+                alert("Insufficient funds or invalid input.");
+                return;
+            }
+            updateDisplay();
+        } else {
+            alert("Input must be greater than zero!");
+        }
     }
 
-    function startGraphUpdates() {
-      intervalIds.forEach((id, index) => {
-        if (id) clearInterval(id);
-        intervalIds[index] = setInterval(() => updateGraph(index), refreshIntervals[index]);
-      });
+    const data1 = { labels: [], datasets: [{ label: 'Graph 1 Value', data: [], borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1, fill: false }] };
+    const data2 = { labels: [], datasets: [{ label: 'Graph 2 Value', data: [], borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1, fill: false }] };
+    const data3 = { labels: [], datasets: [{ label: 'Graph 3 Value', data: [], borderColor: 'rgba(255, 159, 64, 1)', borderWidth: 1, fill: false }] };
+
+    const config1 = { type: 'line', data: data1, options: { scales: { x: { title: { display: true, text: 'Time' } }, y: { title: { display: true, text: 'Value' } } } } };
+    const config2 = { type: 'line', data: data2, options: { scales: { x: { title: { display: true, text: 'Time' } }, y: { title: { display: true, text: 'Value' } } } } };
+    const config3 = { type: 'line', data: data3, options: { scales: { x: { title: { display: true, text: 'Time' } }, y: { title: { display: true, text: 'Value' } } } } };
+
+    const ctx1 = document.getElementById('lineChart1').getContext('2d');
+    const ctx2 = document.getElementById('lineChart2').getContext('2d');
+    const ctx3 = document.getElementById('lineChart3').getContext('2d');
+
+    const lineChart1 = new Chart(ctx1, config1);
+    const lineChart2 = new Chart(ctx2, config2);
+    const lineChart3 = new Chart(ctx3, config3);
+
+    function updateChart() {
+        const currentTime = new Date().toLocaleTimeString();
+        switch (currentGraph) {
+            case 1:
+                data1.labels.push(currentTime);
+                data1.datasets[0].data.push(value1);
+                lineChart1.update();
+                break;
+            case 2:
+                data2.labels.push(currentTime);
+                data2.datasets[0].data.push(value2);
+                lineChart2.update();
+                break;
+            case 3:
+                data3.labels.push(currentTime);
+                data3.datasets[0].data.push(value3);
+                lineChart3.update();
+                break;
+        }
     }
 
-    function checkPasscode() {
-      const inputPasscode = document.getElementById('passcodeInput').value;
-      if (inputPasscode === "12345") {
-        document.getElementById('controls').style.display = 'block';
-        console.log('Passcode correct. Controls unlocked.');
-      } else {
-        alert('Incorrect passcode.');
-      }
-    }
+    intervalId = setInterval(updateChart, refreshInterval);
 
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM fully loaded and parsed');
-      try {
-        initializeChart('lineChart1', 'graphTitle1', 0);
-        initializeChart('lineChart2', 'graphTitle2', 1);
-        initializeChart('lineChart3', 'graphTitle3', 2);
-        startGraphUpdates();
-        console.log('Charts initialized successfully');
-      } catch (error) {
-        console.error('Error during chart initialization:', error);
-      }
-    });
-  </script>
+    function showGraph(graphNumber) {
+        document.querySelectorAll('.chart-container').forEach((container, index) => {
+            container.style.display = (index + 1 === graphNumber) ? 'block' : 'none';
+        });
+        currentGraph = graphNumber;
+        updateDisplay();
+    }
+</script>
 </body>
 </html>
