@@ -11,8 +11,8 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background-color: #d3d3d3;
-      color: black;
+      background-color: #d3d3d3; /* Grey background */
+      color: black; /* Black text */
     }
 
     header {
@@ -182,7 +182,6 @@
     const lineCharts = [];
 
     function initializeChart(canvasId, titleId, index) {
-      console.log(`Initializing chart for ${canvasId}`);
       const ctx = document.getElementById(canvasId).getContext('2d');
       const chartData = {
         labels: [],
@@ -213,9 +212,9 @@
         dataSets[index] = chartData;
         lineCharts[index] = chart;
         document.getElementById(titleId).innerText = `Graph ${index + 1}`;
-        return chart;
+        console.log(`Chart ${index + 1} initialized successfully`);
       } catch (error) {
-        console.error(`Error creating chart for ${canvasId}:`, error);
+        console.error(`Error initializing Chart ${index + 1}:`, error);
       }
     }
 
@@ -223,18 +222,15 @@
       const now = new Date().toLocaleTimeString();
       const randomChange = Math.floor(Math.random() * randomnessRanges[index] * 2 - randomnessRanges[index]);
       values[index] += randomChange;
-      if (values[index] < 0) values[index] = 0;
 
       if (values[index] > peakValues[index]) peakValues[index] = values[index];
 
       dataSets[index].labels.push(now);
       dataSets[index].data.push(values[index]);
-
       if (dataSets[index].labels.length > 10) {
         dataSets[index].labels.shift();
         dataSets[index].data.shift();
       }
-
       lineCharts[index].update();
     }
 
@@ -249,92 +245,9 @@
       const inputPasscode = document.getElementById('passcodeInput').value;
       if (inputPasscode === "12345") {
         document.getElementById('controls').style.display = 'block';
-        console.log("Passcode correct, control panel shown.");
+        console.log('Passcode correct. Controls unlocked.');
       } else {
         alert('Incorrect passcode.');
-      }
-    }
-
-    function closePanel() {
-      console.log("Closing control panel.");
-      document.getElementById('controls').style.display = 'none';
-    }
-
-    function depositCurrency(index) {
-      const amount = parseFloat(document.getElementById(`currencyInput${index + 1}`).value);
-      if (!isNaN(amount) && amount > 0) {
-        // Calculate the investment value based on the current stock price
-        const stockValue = values[index];
-        currency += amount * stockValue;
-        document.getElementById('currencyDisplay').innerText = `Currency: $${currency.toFixed(2)}`;
-        console.log(`Deposited $${(amount * stockValue).toFixed(2)} into Graph ${index + 1}.`);
-      } else {
-        alert('Invalid deposit amount.');
-      }
-    }
-
-    function withdrawCurrency(index) {
-      const amount = parseFloat(document.getElementById(`currencyInput${index + 1}`).value);
-      if (!isNaN(amount) && amount > 0) {
-        const stockValue = values[index];
-        if (currency >= amount * stockValue) {
-          currency -= amount * stockValue;
-          document.getElementById('currencyDisplay').innerText = `Currency: $${currency.toFixed(2)}`;
-          console.log(`Withdrew $${(amount * stockValue).toFixed(2)} from Graph ${index + 1}.`);
-        } else {
-          alert('Insufficient funds for withdrawal.');
-        }
-      } else {
-        alert('Invalid withdrawal amount.');
-      }
-    }
-
-    function updateGraphName() {
-      const selectedGraphIndex = document.getElementById('selectedGraph').value;
-      const newName = document.getElementById('graphName').value;
-      if (newName) {
-        document.getElementById(`graphTitle${parseInt(selectedGraphIndex) + 1}`).innerText = newName;
-        console.log(`Updated Graph ${parseInt(selectedGraphIndex) + 1} name to "${newName}".`);
-      } else {
-        alert('Please enter a new graph name.');
-      }
-    }
-
-    function updateRefreshInterval() {
-      const selectedGraphIndex = document.getElementById('selectedGraph').value;
-      const newInterval = parseInt(document.getElementById('refreshInterval').value);
-      if (!isNaN(newInterval) && newInterval > 0) {
-        refreshIntervals[selectedGraphIndex] = newInterval;
-        clearInterval(intervalIds[selectedGraphIndex]);
-        intervalIds[selectedGraphIndex] = setInterval(() => updateGraph(selectedGraphIndex), newInterval);
-        console.log(`Updated Graph ${parseInt(selectedGraphIndex) + 1} refresh interval to ${newInterval}ms.`);
-      } else {
-        alert('Invalid interval value.');
-      }
-    }
-
-    function updateRandomness() {
-      const selectedGraphIndex = document.getElementById('selectedGraph').value;
-      const newRange = parseInt(document.getElementById('randomnessRange').value);
-      if (!isNaN(newRange) && newRange >= 0) {
-        randomnessRanges[selectedGraphIndex] = newRange;
-        console.log(`Updated Graph ${parseInt(selectedGraphIndex) + 1} randomness range to ±${newRange}.`);
-      } else {
-        alert('Invalid randomness range value.');
-      }
-    }
-
-    function setGraphValue() {
-      const selectedGraphIndex = document.getElementById('selectedGraph').value;
-      const newValue = parseFloat(document.getElementById('setValue').value);
-      if (!isNaN(newValue)) {
-        values[selectedGraphIndex] = newValue;
-        peakValues[selectedGraphIndex] = newValue;
-        dataSets[selectedGraphIndex].labels = [];
-        dataSets[selectedGraphIndex].data = [];
-        console.log(`Set Graph ${parseInt(selectedGraphIndex) + 1} value to ${newValue}.`);
-      } else {
-        alert('Invalid value.');
       }
     }
 
@@ -347,7 +260,7 @@
         startGraphUpdates();
         console.log('Charts initialized successfully');
       } catch (error) {
-        console.error('Error initializing charts:', error);
+        console.error('Error during chart initialization:', error);
       }
     });
   </script>
